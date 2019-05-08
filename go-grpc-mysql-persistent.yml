@@ -35,6 +35,7 @@ objects:
         "kind": "Service"}]'
     name: ${NAME}
   spec:
+    type: NodePort
     ports:
     - name: web
       port: 3000
@@ -336,14 +337,15 @@ parameters:
 - displayName: Database Name
   name: DATABASE_NAME
   required: true
-  value: default
+  value: ToDo
 - displayName: Database User
   name: DATABASE_USER
   required: true
   value: gogrpc
 - displayName: Database Password
-  from: '[a-zA-Z0-9]{16}'
-  generate: expression
+  #from: '[a-zA-Z0-9]{16}'
+  #generate: expression
+  value: ''
   name: DATABASE_PASSWORD
 - description: Set this to a long random string.
   displayName: Golang secret token
