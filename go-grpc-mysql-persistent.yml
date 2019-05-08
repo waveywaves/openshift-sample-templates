@@ -116,15 +116,9 @@ objects:
           - name: DATABASE_NAME
             value: ${DATABASE_NAME}
           - name: DATABASE_USER
-            valueFrom:
-              secretKeyRef:
-                key: database-user
-                name: ${NAME}
+            value: ${DATABASE_USER} 
           - name: DATABASE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: database-password
-                name: ${NAME}
+            value: ${DATABASE_PASSWORD}
           - name: GOGRPC_SECRET_TOKEN
             valueFrom:
               secretKeyRef:
@@ -220,17 +214,13 @@ objects:
         containers:
         - env:
           - name: MYSQL_USER
-            valueFrom:
-              secretKeyRef:
-                key: database-user
-                name: ${NAME}
+            value: ${DATABASE_USER}
           - name: MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                key: database-password
-                name: ${NAME}
+            value: ${DATABASE_PASSWORD}
           - name: MYSQL_DATABASE
             value: ${DATABASE_NAME}
+          - name: MYSQL_ROOT_PASSWORD
+            value: ${DATABASE_ROOT_PASSWORD}
           image: ' '
           name: mysql
           ports:
@@ -345,8 +335,11 @@ parameters:
 - displayName: Database Password
   #from: '[a-zA-Z0-9]{16}'
   #generate: expression
-  value: ''
+  value: 'pass'
   name: DATABASE_PASSWORD
+- displayName: Database Root Password
+  value: 'pass'
+  name: DATABASE_ROOT_PASSWORD
 - description: Set this to a long random string.
   displayName: Golang secret token
   from: '[\w]{50}'
