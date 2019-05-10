@@ -37,9 +37,12 @@ objects:
   spec:
     type: NodePort
     ports:
-    - name: web
+    - name: grpc
       port: 3000
       targetPort: 3000
+    - name: rest
+      port: 3001
+      targetPort: 3001
     selector:
       name: ${NAME}
 - apiVersion: v1
@@ -141,7 +144,10 @@ objects:
           #   timeoutSeconds: 3
           name: go-grpc-mysql-persistent
           ports:
-          - containerPort: 8080
+          - name: grpc 
+            containerPort: 3000
+          - name: rest
+            containerPort: 3001
           # readinessProbe:
           #   httpGet:
           #     path: /health
