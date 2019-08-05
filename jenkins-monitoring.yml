@@ -1,0 +1,101 @@
+apiVersion: v1
+kind: Template
+labels: 
+  app: ${NAME}
+  template: ${NAME}-monitoring 
+objects:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRole
+  metadata:
+    name: prometheus
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - nodes
+    - services
+    - endpoints
+    - pods
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - get
+  - nonResourceURLs:
+    - /metrics
+    verbs:
+    - get
+
+- apiVersion: v1
+  kind: ServiceAccount
+  metadata:
+    name: prometheus
+    namespace: ${NAMESPACE}
+
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: ClusterRoleBinding
+  metadata:
+    name: prometheus
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: prometheus
+  subjects:
+  - kind: ServiceAccount
+    name: prometheus
+    namespace: ${NAMESPACE}
+
+- apiVersion: monitoring.coreos.com/v1
+  kind: ServiceMonitor
+  metadata:
+    labels:
+      app: ${NAMESPACE}
+      name: jenkins
+    name: jenkins
+    namespace: ${NAMESPACE}
+  spec:
+    endpoints:
+    - interval: 15s
+      path: /prometheus/
+      port: web
+    selector:
+      matchLabels:
+        app: ${NAMESPACE}
+        name: jenkins
+
+- apiVersion: monitoring.coreos.com/v1
+  kind: Prometheus
+  metadata:
+    labels:
+      prometheus: prometheus
+    name: jenkins
+    namespace: ${NAMESPACE}
+  spec:
+    alerting:
+      alertmanagers:
+      - name: alertmanager
+        namespace: ${NAMESPACE}
+        port: web
+    enableAdminAPI: false
+    resources:
+      requests:
+        memory: 400Mi
+    serviceAccountName: prometheus
+    serviceMonitorSelector:
+      matchLabels:
+        app: ${NAMESPACE}
+        name: jenkins
+parameters: 
+- displayName: Name
+  name: NAME
+  required: true
+  description: "Name should be either of jenkins-persistent or jenkins-ephemeral"
+- displayName: Namespace
+  name: NAMESPACE
+  required: true
+  description: "Namespace in which Jenkins instance exists which needs to be monitored"
