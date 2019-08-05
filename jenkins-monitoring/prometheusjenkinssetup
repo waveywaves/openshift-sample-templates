@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+if  [ -z $1 ];
+then
+	echo "DEBUG: Please pass the namespace name as an argument"	
+else
+	NAMESPACE=$1
+    oc new-project $NAMESPACE
+	oc project $NAMESPACE
+
+    oc delete clusterrole prometheus
+    oc delete serviceaccount prometheus
+    oc delete clusterrolebinding prometheus
+
+    if [ -z $2 ]
+    then
+        echo "DEBUG: Please pass the second argument"
+    else
+        case $2 in
+            jenkins-persistent|jenkins-ephemeral)
+                oc process $2 -n openshift | oc create -f -
+                oc label namespace $NAMESPACE openshift.io/cluster-monitoring=true
+                oc process -f jenkins-monitoring.yml -p NAMESPACE=$NAMESPACE -p NAME=$2 | oc create -f - 
+                oc new-app grafana/grafana
+
+                oc expose svc prometheus-operated
+            ;;
+
+            *)
+                echo "DEBUG: Please pass the jenkins-persistent or jenkins-ephemeral as second argument"
+            ;;
+        esac
+    fi
+fi
+

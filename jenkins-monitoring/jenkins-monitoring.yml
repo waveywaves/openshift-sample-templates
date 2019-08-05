@@ -54,19 +54,18 @@ objects:
   kind: ServiceMonitor
   metadata:
     labels:
-      app: ${NAMESPACE}
+      app: ${NAME}
       name: jenkins
     name: jenkins
     namespace: ${NAMESPACE}
   spec:
     endpoints:
-    - interval: 15s
+    - interval: 10s
       path: /prometheus/
       port: web
     selector:
       matchLabels:
-        app: ${NAMESPACE}
-        name: jenkins
+        app: ${NAME}
 
 - apiVersion: monitoring.coreos.com/v1
   kind: Prometheus
@@ -88,7 +87,7 @@ objects:
     serviceAccountName: prometheus
     serviceMonitorSelector:
       matchLabels:
-        app: ${NAMESPACE}
+        app: ${NAME}
         name: jenkins
 parameters: 
 - displayName: Name
